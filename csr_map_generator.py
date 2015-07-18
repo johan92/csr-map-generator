@@ -179,7 +179,7 @@ always_comb
 // ******************************************
 //      Reading stuff 
 // ******************************************
-logic [{{reg_d_w-1}}:0] reg_rd_data;
+logic [{{reg_d_w-1}}:0] reg_rd_data = {{reg_d_w}}'h0;
 
 always_ff @( posedge reg_clk_i or posedge reg_rst_i )
   if( reg_rst_i )

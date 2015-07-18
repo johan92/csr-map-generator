@@ -132,7 +132,7 @@ always_comb
 // ******************************************
 //      Reading stuff 
 // ******************************************
-logic [31:0] reg_rd_data;
+logic [31:0] reg_rd_data = 32'h0;
 
 always_ff @( posedge reg_clk_i or posedge reg_rst_i )
   if( reg_rst_i )
