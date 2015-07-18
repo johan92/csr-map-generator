@@ -200,27 +200,38 @@ endmodule
 """)
 
 if __name__ == "__main__":
-    
-    r0 = Reg( 0x0, "FLOW_GEN")
+  
+  MODULE_NAME = "example_csr_map"
 
-    r0.add_bits( RegBits( 7, 0,   "flow_num", "RW" ) )
-    r0.add_bits( RegBits( 15, 15, "flow_en" , "RW" ) )
-    r0.add_bits( RegBits( 17, 17, "flow_reset", "RW_SC" ) )
-    r0.add_bits( RegBits( 21, 21, "flow_error", "RO_LH" ) )
+  r0 = Reg( 0x0, "FLOW_GEN")
+  r0.add_bits( RegBits( 7, 0,   "flow_num", "RW"      ) )
+  r0.add_bits( RegBits( 15, 15, "flow_en" , "RW"      ) )
+  r0.add_bits( RegBits( 17, 17, "flow_reset", "RW_SC" ) )
+  r0.add_bits( RegBits( 21, 21, "flow_error", "RO_LH" ) )
 
-    r1 = Reg( 0x1, "STAT" )
-    r1.add_bits( RegBits( 10, 0,   "stat_addr",    "RW",       0x15  ) )
-    r1.add_bits( RegBits( 15, 15,  "stat_rd_en",   "RW"              ) )
-    r1.add_bits( RegBits( 25, 16,  "stat_counter", "RO"              ) )
-    r1.add_bits( RegBits( 31, 30,  "stat_version", "RO_CONST", 0x3   ) )
+  r1 = Reg( 0x1, "STAT" )
+  r1.add_bits( RegBits( 10, 0,   "stat_addr",    "RW",       0x15  ) )
+  r1.add_bits( RegBits( 15, 15,  "stat_rd_en",   "RW"              ) )
+  r1.add_bits( RegBits( 25, 16,  "stat_counter", "RO"              ) )
+  r1.add_bits( RegBits( 31, 30,  "stat_version", "RO_CONST", 0x3   ) )
 
-    reg_l = [r0, r1]
-    
-    res = csr_map_template.render(
-        module_name = "my_csr_map",
-        reg_d_w     = 32,
-        reg_a_w     = 8,
-        data        = reg_l 
-    )
+  reg_l = [r0, r1]
 
-    print res
+  res = csr_map_template.render(
+      module_name = MODULE_NAME,
+      reg_d_w     = 32,
+      reg_a_w     = 8,
+      data        = reg_l 
+  )
+
+  print res
+
+  # saving to systemverilog file
+  try:
+    out_file = open( MODULE_NAME+".sv", 'w')
+  except Exception as ex:
+    print "Error opening \"%s\": %s" %( out_name, ex.strerror )
+    exit(1)
+
+  out_file.write( res )
+
