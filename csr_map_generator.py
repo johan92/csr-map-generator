@@ -61,6 +61,14 @@ reg_{{r.num}}_{{r.name_lowcase}}___{{b.name_lowcase}}
 {{ "  %-12s %-10s %-10s" | format( dir,  signal( width ),  name+eol ) }}
 {%- endmacro %}
 
+{%- macro get_port_name( b ) -%}
+{%- if b.port_signal_input -%}
+{{b.name_lowcase}}_i
+{%- else -%}
+{{b.name_lowcase}}_o
+{%- endif -%}
+{%- endmacro -%}
+
 // Generated using CSR map generator 
 // https://github.com/johan92/csr-map-generator
 
@@ -71,9 +79,9 @@ module {{module_name}}(
 
 {%- for b in p.bits %}
   {%- if b.port_signal_input %}
-{{print_port_signal( "input", b.width, b.name_lowcase )}}
+{{print_port_signal( "input", b.width, get_port_name( b ) )}}
   {%- elif b.port_signal_output %}
-{{print_port_signal( "output", b.width, b.name_lowcase )}}
+{{print_port_signal( "output", b.width, get_port_name( b ) )}}
   {%- endif %}
 {%- endfor %}
 {% endfor %}
@@ -126,11 +134,11 @@ always_ff @( posedge reg_clk_i or posedge reg_rst_i )
       {{reg_name_bits( p, b )}} <= {{bit_init_value( b )}};
     else
       {%- if b.mode == "RO_LL" %}
-      if( {{b.name_lowcase}} == '0 )
-        {{reg_name_bits( p, b )}} <= '1;
+      if( {{get_port_name( b )}} == 1'b0 )
+        {{reg_name_bits( p, b )}} <= 1'b1;
       {%- elif b.mode == "RO_LH" %}
-      if( {{b.name_lowcase}} == '1 )
-        {{reg_name_bits( p, b )}} <= '1;
+      if( {{get_port_name( b )}} == 1'b1 )
+        {{reg_name_bits( p, b )}} <= 1'b1;
       {%- endif %}
 
 {% endif %}
@@ -139,26 +147,26 @@ always_ff @( posedge reg_clk_i or posedge reg_rst_i )
 // assigning to output
 {%- for b in p.bits %}
 {%- if b.port_signal_output %}
-assign {{b.name_lowcase}} = {{reg_name_bits( p, b )}};
+assign {{get_port_name( b )}} = {{reg_name_bits( p, b )}};
 {%- endif %}
 {%- endfor %}
 
-// assigning to read data
 {%- macro print_in_always_comb( r, b, _right_value ) -%}
 {%- if b == "" -%}
 {{ "  %s%-7s = %s;" | format( reg_name( r ) + "_read",  "",  _right_value ) }}
 {%- else -%}
 {{ "  %s%-7s = %s;" | format( reg_name( r ) + "_read", "["+b.bit_msb|string+":"+b.bit_lsb|string+"]" ,  _right_value ) }}
-{%- endif %}
+{%- endif -%}
 {%- endmacro %}
 
+// assigning to read data
 always_comb
   begin
   {{print_in_always_comb( p, "", reg_d_w|string+"'h0" ) }}
 
 {%- for b in p.bits %}
   {%- if b.mode == "RO" %}
-  {{print_in_always_comb( p, b, b.name_lowcase )}}
+  {{print_in_always_comb( p, b, get_port_name( b ) )}}
   {%- else %}
   {{print_in_always_comb( p, b, reg_name_bits( p, b ) )}}
   {%- endif %}
@@ -168,7 +176,9 @@ always_comb
 {%- endfor %}
 
 
-// ******* Reading stuff *******
+// ******************************************
+//      Reading stuff 
+// ******************************************
 logic [{{reg_d_w-1}}:0] reg_rd_data;
 
 always_ff @( posedge reg_clk_i or posedge reg_rst_i )

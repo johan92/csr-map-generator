@@ -1,19 +1,17 @@
-
-
 // Generated using CSR map generator 
 // https://github.com/johan92/csr-map-generator
 
 module example_csr_map(
   // Register FLOW_GEN signals
-  output       [7:0]      flow_num, 
-  output       [0:0]      flow_en,  
-  output       [0:0]      flow_reset,
-  input        [0:0]      flow_error,
+  output       [7:0]      flow_num_o,
+  output       [0:0]      flow_en_o,
+  output       [0:0]      flow_reset_o,
+  input        [0:0]      flow_error_i,
 
   // Register STAT signals
-  output       [10:0]     stat_addr,
-  output       [0:0]      stat_rd_en,
-  input        [9:0]      stat_counter,
+  output       [10:0]     stat_addr_o,
+  output       [0:0]      stat_rd_en_o,
+  input        [9:0]      stat_counter_i,
 
 
   // CSR interface
@@ -68,19 +66,18 @@ always_ff @( posedge reg_clk_i or posedge reg_rst_i )
     if( reg_rd_en_i && ( reg_addr_i == 8'h0 ) )
       reg_0_flow_gen___flow_error <= 1'h0;
     else
-      if( flow_error == '1 )
-        reg_0_flow_gen___flow_error <= '1;
+      if( flow_error_i == 1'b1 )
+        reg_0_flow_gen___flow_error <= 1'b1;
 
 
 
 
 // assigning to output
-assign flow_num = reg_0_flow_gen___flow_num;
-assign flow_en = reg_0_flow_gen___flow_en;
-assign flow_reset = reg_0_flow_gen___flow_reset;
+assign flow_num_o = reg_0_flow_gen___flow_num;
+assign flow_en_o = reg_0_flow_gen___flow_en;
+assign flow_reset_o = reg_0_flow_gen___flow_reset;
 
 // assigning to read data
-
 always_comb
   begin
     reg_0_flow_gen_read        = 32'h0;
@@ -118,22 +115,23 @@ always_ff @( posedge reg_clk_i or posedge reg_rst_i )
 
 
 // assigning to output
-assign stat_addr = reg_1_stat___stat_addr;
-assign stat_rd_en = reg_1_stat___stat_rd_en;
+assign stat_addr_o = reg_1_stat___stat_addr;
+assign stat_rd_en_o = reg_1_stat___stat_rd_en;
 
 // assigning to read data
-
 always_comb
   begin
     reg_1_stat_read        = 32'h0;
     reg_1_stat_read[10:0]  = reg_1_stat___stat_addr;
     reg_1_stat_read[15:15] = reg_1_stat___stat_rd_en;
-    reg_1_stat_read[25:16] = stat_counter;
+    reg_1_stat_read[25:16] = stat_counter_i;
     reg_1_stat_read[31:30] = reg_1_stat___stat_version;
   end
 
 
-// ******* Reading stuff *******
+// ******************************************
+//      Reading stuff 
+// ******************************************
 logic [31:0] reg_rd_data;
 
 always_ff @( posedge reg_clk_i or posedge reg_rst_i )
