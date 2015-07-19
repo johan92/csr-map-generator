@@ -62,12 +62,15 @@ always_ff @( posedge reg_clk_i or posedge reg_rst_i )
 always_ff @( posedge reg_clk_i or posedge reg_rst_i )
   if( reg_rst_i )
     reg_0_flow_gen___flow_error <= 1'h0;
-  else 
-    if( reg_rd_en_i && ( reg_addr_i == 8'h0 ) )
-      reg_0_flow_gen___flow_error <= 1'h0;
-    else
+  else
+    begin
+      if( reg_rd_en_i && ( reg_addr_i == 8'h0 ) )
+        reg_0_flow_gen___flow_error <= 1'h0;
+
+      
       if( flow_error_i == 1'b1 )
         reg_0_flow_gen___flow_error <= 1'b1;
+    end
 
 
 

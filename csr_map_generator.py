@@ -129,17 +129,19 @@ always_ff @( posedge reg_clk_i or posedge reg_rst_i )
 always_ff @( posedge reg_clk_i or posedge reg_rst_i )
   if( reg_rst_i )
     {{reg_name_bits( p, b )}} <= {{bit_init_value( b )}};
-  else 
-    if( reg_rd_en_i && ( reg_addr_i == {{reg_a_w}}'h{{p.num}} ) )
-      {{reg_name_bits( p, b )}} <= {{bit_init_value( b )}};
-    else
-      {%- if b.mode == "RO_LL" %}
+  else
+    begin
+      if( reg_rd_en_i && ( reg_addr_i == {{reg_a_w}}'h{{p.num}} ) )
+        {{reg_name_bits( p, b )}} <= {{bit_init_value( b )}};
+
+      {% if b.mode == "RO_LL" %}
       if( {{get_port_name( b )}} == 1'b0 )
-        {{reg_name_bits( p, b )}} <= 1'b1;
+        {{reg_name_bits( p, b )}} <= 1'b0;
       {%- elif b.mode == "RO_LH" %}
       if( {{get_port_name( b )}} == 1'b1 )
         {{reg_name_bits( p, b )}} <= 1'b1;
       {%- endif %}
+    end
 
 {% endif %}
 {% endfor %}
